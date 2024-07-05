@@ -16,7 +16,14 @@ This tool converts FlightAware tracklog URLs to ForeFlight-compatible KML files.
 2. **Click "Convert" to process the URL.**
 3. **Download the converted KML file** by clicking the "Download Converted KML" link.
 
-## Importing to ForeFlight
+## Importing to ForeFlight on iPad
+1. Download converted file
+2. Click button to file app
+3. Click the share button and select Foreflight
+4. Select Custom Content -> Custom Map Layers
+5. Go to Maps -> Layers -> Scroll down to the converted FlightAware file
+
+## Importing to ForeFlight on MacOS
 1. Download converted file
 2. Airdrop file to iPhone/iPad
 3. When the file app appears after downloading from Airdrop -> Click the share button and select Foreflight

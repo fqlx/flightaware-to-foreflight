@@ -62,6 +62,7 @@
     <input type="text" id="flightAwareUrl" placeholder="https://www.flightaware.com/live/flight/N724R/history/20240703/2118Z/KFRG/KFRG/tracklog">
     <button onclick="convertKML()">Convert</button>
     <a id="downloadLink" style="display: none;">Download Converted KML</a>
+    <button id="openFileButton" style="display: none;" onclick="openFile()">Open File</button>
     <pre id="log"></pre>
 
     <script>
@@ -134,6 +135,13 @@
                     downloadLink.download = filename;
                     downloadLink.style.display = 'block';
                     downloadLink.textContent = 'Download Converted KML';
+
+                    const openFileButton = document.getElementById('openFileButton');
+                    openFileButton.style.display = 'block';
+
+                    openFileButton.onclick = () => {
+                        window.open(url, '_blank');
+                    };
 
                     logMessage('Conversion successful. Ready to download.');
                 })
