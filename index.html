@@ -58,8 +58,8 @@
 </head>
 <body>
     <h1>FlightAware to ForeFlight KML Converter</h1>
-    <label for="flightAwareUrl">Enter the FlightAware TrackLog URL:</label>
-    <input type="text" id="flightAwareUrl" placeholder="https://www.flightaware.com/live/flight/N724R/history/20240703/2118Z/KFRG/KFRG/tracklog">
+    <label for="flightAwareUrl">Enter your FlightAware Track Log URL:</label>
+    <input type="text" id="flightAwareUrl" placeholder="https://www.flightaware.com/live/flight/N724R/history/20240624/1454Z/KFRG/KFRG/tracklog">
     <button onclick="convertKML()">Convert</button>
     <a id="downloadLink" style="display: none;">Download Converted KML</a>
     <pre id="log"></pre>
@@ -134,13 +134,38 @@
                     downloadLink.download = filename;
                     downloadLink.style.display = 'block';
                     downloadLink.textContent = 'Download Converted KML';
+
                     logMessage('Conversion successful. Ready to download.');
+
+                    // Display import instructions
+                    displayInstructions();
                 })
                 .catch(error => {
                     logMessage(`Error: ${error.message}`);
                     console.error('Error fetching or converting KML:', error);
                 });
         }
+
+        function displayInstructions() {
+            const instructions = `
+## Importing to ForeFlight on iOS/iPadOS
+1. Download converted file
+2. Open the file app
+3. Click the share button and select Foreflight
+4. Select Custom Content -> Custom Map Layers
+5. Go to Maps -> Layers -> Scroll down to the converted FlightAware file
+
+## Importing to ForeFlight on MacOS
+1. Download converted file
+2. Airdrop file to iPhone/iPad
+3. When the file app appears after downloading from Airdrop -> Click the share button and select Foreflight
+4. Select Custom Content -> Custom Map Layers
+5. Go to Maps -> Layers -> Scroll down to the converted FlightAware file
+            `;
+            const log = document.getElementById('log');
+            log.textContent += instructions;
+        }
     </script>
 </body>
 </html>
+
