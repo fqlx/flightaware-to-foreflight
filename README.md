@@ -2,6 +2,10 @@
 
 This tool converts FlightAware tracklog URLs to ForeFlight-compatible KML files. It allows users to enter a FlightAware URL and download a converted KML file that can be imported into ForeFlight.
 
+## Link to converter tool
+
+https://abwburns.com/flightaware-to-foreflight/
+
 ## Features
 
 - Converts FlightAware URLs with `/tracklog` or `/google_earth` to the `/google_earth` format.
@@ -18,7 +22,7 @@ This tool converts FlightAware tracklog URLs to ForeFlight-compatible KML files.
 
 ## Importing to ForeFlight on iOS/iPadOS
 1. Download converted file
-2. Open the file app
+2. Open the file app, select the file
 3. Click the share button and select Foreflight
 4. Select Custom Content -> Custom Map Layers
 5. Go to Maps -> Layers -> Scroll down to the converted FlightAware file
