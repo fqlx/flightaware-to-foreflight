@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlightAware to ForeFlight KML Converter</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f0f8ff;
+        }
+        h1 {
+            color: #333;
+        }
+        label {
+            display: block;
+            margin: 10px 0 5px;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        a {
+            display: block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #28a745;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            text-align: center;
+        }
+        a:hover {
+            background-color: #218838;
+        }
+        pre {
+            background: #f0f0f0;
+            padding: 10px;
+            margin-top: 20px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>FlightAware to ForeFlight KML Converter</h1>
+    <label for="flightAwareUrl">Enter your FlightAware ID or URL:</label>
+    <input type="text" id="flightAwareUrl" placeholder="https://www.flightaware.com/live/flight/N724R/history/20240703/2118ZZ/KFRG/KFRG/google_earth">
+    <button onclick="convertKML()">Convert</button>
+    <a id="downloadLink" style="display: none;">Download Converted KML</a>
+    <pre id="log"></pre>
+
+    <script>
+        function logMessage(message) {
+            const log = document.getElementById('log');
+            log.textContent += message + '\n';
+            log.style.display = 'block';
+        }
+
+        function convertKML() {
+            const urlInput = document.getElementById('flightAwareUrl').value;
+            const urlPattern = /https:\/\/www\.flightaware\.com\/live\/flight\/(\w+)\/history\/(\d{8})\/(\d{4}Z{1,2})\/(\w+)\/(\w+)\/(?:google_earth|tracklog)/;
+            const match = urlInput.match(urlPattern);
+            if (!match) {
+                alert('Please enter a valid FlightAware URL');
+                return;
+            }
+            const flightId = match[1];
+            const date = match[2];
+            const time = match[3];
+            const departure = match[4];
+            const arrival = match[5];
+
+            // Construct the KML URL with /google-earth
+            const kmlUrl = `https://www.flightaware.com/live/flight/${flightId}/history/${date}/${time}/${departure}/${arrival}/google_earth/kml`;
+            const proxyUrl = `https://cors-anywhere.herokuapp.com/${kmlUrl}`;
+
+            logMessage(`Fetching KML from: ${proxyUrl}`);
+
+            fetch(proxyUrl)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`Network response was not ok: ${response.statusText}`);
+                    }
+                    return response.text();
+                })
+                .then(data => {
+                    const parser = new DOMParser();
+                    const kmlDoc = parser.parseFromString(data, 'application/xml');
+                    const coordElements = kmlDoc.getElementsByTagName('gx:coord');
+                    const coords = Array.from(coordElements)
+                        .map(coord => coord.textContent.trim().replace(' ', ','))
+                        .join(' ');
+
+                    if (!coords) {
+                        throw new Error('No coordinates found in the KML file.');
+                    }
+
+                    logMessage(`Extracted coordinates: ${coords}`);
+
+                    const foreflightKml = `<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+  <Document>
+    <Placemark>
+      <name>Flight Path</name>
+      <LineString>
+        <coordinates>
+          ${coords}
+        </coordinates>
+      </LineString>
+    </Placemark>
+  </Document>
+</kml>`;
+
+                    const blob = new Blob([foreflightKml], { type: 'application/vnd.google-earth.kml+xml' });
+                    const url = URL.createObjectURL(blob);
+                    const downloadLink = document.getElementById('downloadLink');
+                    const filename = `converted_${flightId}_${departure}_${arrival}_${date}.kml`;
+                    downloadLink.href = url;
+                    downloadLink.download = filename;
+                    downloadLink.style.display = 'block';
+                    downloadLink.textContent = 'Download Converted KML';
+
+                    logMessage('Conversion successful. Ready to download.');
+                })
+                .catch(error => {
+                    logMessage(`Error: ${error.message}`);
+                    console.error('Error fetching or converting KML:', error);
+                });
+        }
+    </script>
+</body>
+</html>
