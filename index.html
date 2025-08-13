@@ -87,7 +87,7 @@
 
             // Construct the KML URL with /google-earth
             const kmlUrl = `https://www.flightaware.com/live/flight/${flightId}/history/${date}/${time}/${departure}/${arrival}/google_earth/kml`;
-            const proxyUrl = `https://cors-anywhere.herokuapp.com/${kmlUrl}`;
+            const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(kmlUrl)}`;
 
             logMessage(`Fetching KML from: ${proxyUrl}`);
 
@@ -96,9 +96,20 @@
                     if (!response.ok) {
                         throw new Error(`Network response was not ok: ${response.statusText}`);
                     }
-                    return response.text();
+                    return response.json();
                 })
-                .then(data => {
+                .then(result => {
+                    let data = result.contents;
+                    if (!data) {
+                        throw new Error('No content returned from proxy service');
+                    }
+                    
+                    // Check if the response is a base64 data URL
+                    if (data.startsWith('data:application/vnd.google-earth.kml+xml;base64,')) {
+                        const base64Data = data.split(',')[1];
+                        data = atob(base64Data);
+                    }
+                    
                     const parser = new DOMParser();
                     const kmlDoc = parser.parseFromString(data, 'application/xml');
                     const coordElements = kmlDoc.getElementsByTagName('gx:coord');
